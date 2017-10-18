@@ -3,8 +3,7 @@
 
 package com.yahoo.parsec.clients;
 
-import com.ning.http.client.Param;
-import com.ning.http.client.cookie.Cookie;
+import org.asynchttpclient.cookie.Cookie;
 
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -77,21 +76,23 @@ public final class ParsecHttpUtil {
     }
 
     /**
-     * Get {@link javax.ws.rs.core} {@link Response} from Ning {@link com.ning.http.client.Response}.
+     * Get {@link javax.ws.rs.core} {@link Response} from {@link org.asynchttpclient.Response}.
      *
-     * @param ningResponse Ning {@link com.ning.http.client.Response}
+     * @param ningResponse Ning {@link org.asynchttpclient.Response}
      * @return {@link Response}
      * @throws IOException IO exception
      */
-    public static Response getResponse(final com.ning.http.client.Response ningResponse) throws IOException {
+    public static Response getResponse(final org.asynchttpclient.Response ningResponse) throws IOException {
         Response.ResponseBuilder responseBuilder = Response
             .status(ningResponse.getStatusCode())
             .type(ningResponse.getContentType());
 
         if (ningResponse.hasResponseHeaders()) {
-            ningResponse.getHeaders().entrySet()
-                .forEach(entry -> entry.getValue()
-                    .forEach(value -> responseBuilder.header(entry.getKey(), value)));
+            Iterator<Map.Entry<String, String>> it = ningResponse.getHeaders().iterator();
+            if (it.hasNext()) {
+                Map.Entry<String, String> entry = it.next();
+                responseBuilder.header(entry.getKey(), entry.getValue());
+            }
         }
 
         if (ningResponse.hasResponseBody()) {

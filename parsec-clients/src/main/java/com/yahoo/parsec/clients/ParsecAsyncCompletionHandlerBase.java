@@ -3,7 +3,7 @@
 
 package com.yahoo.parsec.clients;
 
-import com.ning.http.client.AsyncCompletionHandler;
+import org.asynchttpclient.AsyncCompletionHandler;
 
 import javax.ws.rs.core.Response;
 
@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
  */
 public class ParsecAsyncCompletionHandlerBase extends AsyncCompletionHandler<Response> {
     @Override
-    public Response onCompleted(final com.ning.http.client.Response ningResponse) throws Exception {
+    public Response onCompleted(final org.asynchttpclient.Response ningResponse) throws Exception {
         return ParsecHttpUtil.getResponse(ningResponse);
     }
 }

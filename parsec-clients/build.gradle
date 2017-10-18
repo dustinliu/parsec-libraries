@@ -7,16 +7,16 @@ repositories {
 }
 
 dependencies {
-    compile group: 'com.ning'                     , name: 'async-http-client', version: '1.9.38'
+    compile group: 'org.asynchttpclient'          , name: 'async-http-client', version: '2.0.37'
     compile group: 'com.github.ben-manes.caffeine', name: 'caffeine'         , version: '2.2.2'
     compile group: 'com.google.guava'             , name: 'guava'            , version: '18.0'
     compile group: 'commons-logging'              , name: 'commons-logging'  , version: '1.2'
     compile group: 'javax.ws.rs'                  , name: 'javax.ws.rs-api'  , version: '2.0.1'
     compile group: 'org.apache.commons'           , name: 'commons-lang3'    , version: '3.4'
-    compile(group: 'org.glassfish.jersey.core'    , name: 'jersey-common'    , version: '2.0.1') {
-        exclude(module: 'guava')
-        exclude(module: 'javax.ws.rs-api')
-    }
+//    compile(group: 'org.glassfish.jersey.core'    , name: 'jersey-common'    , version: '2.0.1') {
+//        exclude(module: 'guava')
+//        exclude(module: 'javax.ws.rs-api')
+//    }
     compile group: 'com.fasterxml.jackson.core'   , name: 'jackson-databind' , version: '2.7.3'
     compile group: 'org.slf4j'                    , name: 'slf4j-api'        , version: '1.7.12'
 

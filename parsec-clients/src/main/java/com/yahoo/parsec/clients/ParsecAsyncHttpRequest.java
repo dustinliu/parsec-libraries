@@ -3,15 +3,16 @@
 
 package com.yahoo.parsec.clients;
 
-import com.ning.http.client.*;
-import com.ning.http.client.cookie.Cookie;
-import com.ning.http.client.multipart.ByteArrayPart;
-import com.ning.http.client.multipart.FilePart;
-import com.ning.http.client.multipart.Part;
-import com.ning.http.client.multipart.StringPart;
-import com.ning.http.client.uri.Uri;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.asynchttpclient.Param;
+import org.asynchttpclient.Request;
+import org.asynchttpclient.RequestBuilder;
+import org.asynchttpclient.proxy.ProxyServer;
+import org.asynchttpclient.request.body.multipart.ByteArrayPart;
+import org.asynchttpclient.request.body.multipart.FilePart;
+import org.asynchttpclient.request.body.multipart.Part;
+import org.asynchttpclient.request.body.multipart.StringPart;
 
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -19,7 +20,12 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -109,7 +115,7 @@ public class ParsecAsyncHttpRequest {
         }
 
         // Compare local fields except Ning request
-        if (!EqualsBuilder.reflectionEquals(this, object, new String[] {"ningRequest"})) {
+        if (!EqualsBuilder.reflectionEquals(this, object, "ningRequest")) {
             return false;
         }
 

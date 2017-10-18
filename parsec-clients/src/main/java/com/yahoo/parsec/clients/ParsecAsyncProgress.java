@@ -23,6 +23,7 @@ public class ParsecAsyncProgress {
      * the connect time.
      */
     private long connectTime;
+    private long tlsTime;
     /**
      * the pretransfer time.
      */
@@ -68,6 +69,15 @@ public class ParsecAsyncProgress {
      */
     public void setConnectTime(long connectTime) {
         this.connectTime = connectTime;
+    }
+
+    @JsonProperty("tls_time")
+    public long getTlsTime() {
+        return tlsTime;
+    }
+
+    public void setTlsTime(long tlsTime) {
+        this.tlsTime = tlsTime;
     }
 
     /**

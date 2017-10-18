@@ -3,9 +3,9 @@
 
 package com.yahoo.parsec.clients;
 
-import com.ning.http.client.AsyncHandler;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Request;
+import org.asynchttpclient.AsyncHandler;
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

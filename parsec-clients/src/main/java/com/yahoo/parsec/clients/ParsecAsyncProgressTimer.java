@@ -7,6 +7,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by hankting on 9/6/15.
  */
@@ -27,6 +29,8 @@ public final class ParsecAsyncProgressTimer {
         TIMER_NAMELOOKUP,
         /** connect op. */
         TIMER_CONNECT,
+        /** ssl handshake op. */
+        TIMER_TLS,
         /** pretransfer op. */
         TIMER_PRETRANSFER,
         /** starttransfer op. */
@@ -50,7 +54,7 @@ public final class ParsecAsyncProgressTimer {
         //
         // time in microsecond
         //
-        long now = System.nanoTime() / DateUtils.MILLIS_PER_SECOND;
+        long now = TimeUnit.NANOSECONDS.toMicros(System.nanoTime());
         switch (opCode) {
             case TIMER_STARTSINGLE:
                 progress.setStartSingleTime(now);
@@ -60,6 +64,9 @@ public final class ParsecAsyncProgressTimer {
                 break;
             case TIMER_CONNECT:
                 progress.setConnectTime(now - progress.getStartSingleTime());
+                break;
+            case TIMER_TLS:
+                progress.setTlsTime(now - progress.getStartSingleTime());
                 break;
             case TIMER_STARTTRANSFER:
                 progress.setStartTransferTime(now - progress.getStartSingleTime());

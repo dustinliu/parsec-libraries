@@ -3,8 +3,8 @@
 package com.yahoo.parsec.clients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.Response;
+import org.asynchttpclient.AsyncCompletionHandler;
+import org.asynchttpclient.Response;
 
 import javax.xml.ws.http.HTTPException;
 import java.util.HashSet;

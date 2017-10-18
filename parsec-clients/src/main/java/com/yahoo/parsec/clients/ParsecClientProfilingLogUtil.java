@@ -7,9 +7,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ning.http.client.Request;
-import com.ning.http.client.Response;
 import org.apache.commons.lang3.time.DateUtils;
+import org.asynchttpclient.Request;
+import org.asynchttpclient.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public final class ParsecClientProfilingLogUtil {
 
         String reqUrl = request.getUri().toUrl();
         String reqMethod = request.getMethod();
-        String reqHostHeader = request.getHeaders().getFirstValue(ParsecClientDefine.HEADER_HOST);
+        String reqHostHeader = request.getHeaders().get(ParsecClientDefine.HEADER_HOST);
 
         if (response != null) {
             contentLength = response.getHeader(ParsecClientDefine.HEADER_CONTENT_LENGTH);

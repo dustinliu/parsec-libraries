@@ -3,11 +3,21 @@
 
 package com.yahoo.parsec.clients;
 
-import com.ning.http.client.*;
+import io.netty.channel.Channel;
+import org.asynchttpclient.AsyncHandler;
+import org.asynchttpclient.HttpResponseBodyPart;
+import org.asynchttpclient.HttpResponseHeaders;
+import org.asynchttpclient.HttpResponseStatus;
+import org.asynchttpclient.Request;
+import org.asynchttpclient.Response;
+import org.asynchttpclient.handler.AsyncHandlerExtensions;
+import org.asynchttpclient.handler.ProgressAsyncHandler;
+import org.asynchttpclient.netty.request.NettyRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * {@link AsyncHandler} wrapper that logs connection related information.
@@ -77,170 +87,151 @@ class ParsecAsyncHandlerWrapper<T> implements AsyncHandler<T>, ProgressAsyncHand
         this.requestCount = 0;
     }
 
-    /**
-     * onBodyPartReceived.
-     *
-     * @param bodyPart body part
-     * @return STATE
-     * @throws Exception exception
-     */
     @Override
-    public STATE onBodyPartReceived(final HttpResponseBodyPart bodyPart) throws Exception {
-        builder.accumulate(bodyPart);
-        return asyncHandler.onBodyPartReceived(bodyPart);
-    }
-
-    /**
-     * onConnectionOpen.
-     */
-    @Override
-    public void onConnectionOpen() {
-        LOGGER.debug("onConnectionOpen: " + System.currentTimeMillis());
-        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_CONNECT);
+    public void onHostnameResolutionAttempt(String name) {
+        LOGGER.debug("onHostnameResolutionAttempt: " + System.currentTimeMillis());
         if (extensions != null) {
-            extensions.onConnectionOpen();
+            extensions.onHostnameResolutionAttempt(name);
         }
     }
 
-    /**
-     * onConnectionPooled.
-     */
     @Override
-    public void onConnectionPooled() {
-        LOGGER.debug("onConnectionPooled: " + System.currentTimeMillis());
-        if (extensions != null) {
-            extensions.onConnectionPooled();
-        }
-    }
-
-    /**
-     * onDnsResolved.
-     *
-     * @param inetAddress address
-     */
-    @Override
-    public void onDnsResolved(final InetAddress inetAddress) {
-        LOGGER.debug("onDnsResolved: " + System.currentTimeMillis());
+    public void onHostnameResolutionSuccess(String name, List<InetSocketAddress> addresses) {
+        LOGGER.debug("onHostnameResolutionSuccess: " + System.currentTimeMillis());
         ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_NAMELOOKUP);
         if (extensions != null) {
-            extensions.onDnsResolved(inetAddress);
+            extensions.onHostnameResolutionSuccess(name, addresses);
         }
     }
 
-    /**
-     * onHeadersReceived.
-     * @param headers headers
-     * @return STATE
-     * @throws Exception exception
-     */
     @Override
-    public STATE onHeadersReceived(final HttpResponseHeaders headers) throws Exception {
-        builder.accumulate(headers);
-        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_STARTTRANSFER);
-        return asyncHandler.onHeadersReceived(headers);
-    }
-
-    /**
-     * onOpenConnection.
-     */
-    public void onOpenConnection() {
-        LOGGER.debug("onOpenConnection: " + System.currentTimeMillis());
+    public void onHostnameResolutionFailure(String name, Throwable cause) {
+        LOGGER.debug("onHostnameResolutionFailure: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_NAMELOOKUP);
         if (extensions != null) {
-            extensions.onOpenConnection();
+            extensions.onHostnameResolutionFailure(name, cause);
         }
     }
 
-    /**
-     * onPoolConnection.
-     */
-    public void onPoolConnection() {
-        LOGGER.debug("onPoolConnection: " + System.currentTimeMillis());
+    @Override
+    public void onTcpConnectAttempt(InetSocketAddress remoteAddress) {
+        LOGGER.debug("onTcpConnectAttempt: " + System.currentTimeMillis());
+        if (extensions != null) {
+            extensions.onTcpConnectAttempt(remoteAddress);
+        }
+    }
+
+    @Override
+    public void onTcpConnectSuccess(InetSocketAddress remoteAddress, Channel connection) {
+        LOGGER.debug("onTcpConnectSuccess: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_CONNECT);
+        if (extensions != null) {
+            extensions.onTcpConnectSuccess(remoteAddress, connection);
+        }
+    }
+
+    @Override
+    public void onTcpConnectFailure(InetSocketAddress remoteAddress, Throwable cause) {
+        LOGGER.debug("onTcpConnectFailure: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_CONNECT);
+        if (extensions != null) {
+            extensions.onTcpConnectFailure(remoteAddress, cause);
+        }
+    }
+
+    @Override
+    public void onTlsHandshakeAttempt() {
+        LOGGER.debug("onTlsHandshakeAttempt: " + System.currentTimeMillis());
+        if (extensions != null) {
+            extensions.onTlsHandshakeAttempt();
+        }
+    }
+
+    @Override
+    public void onTlsHandshakeSuccess() {
+        LOGGER.debug("onTlsHandshakeSuccess: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_TLS);
+        if (extensions != null) {
+            extensions.onTlsHandshakeSuccess();
+        }
+    }
+
+    @Override
+    public void onTlsHandshakeFailure(Throwable cause) {
+        LOGGER.debug("onTlsHandshakeFailure: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_TLS);
+        if (extensions != null) {
+            extensions.onTlsHandshakeFailure(cause);
+        }
+    }
+
+    @Override
+    public void onConnectionPoolAttempt() {
+        LOGGER.debug("onConnectionPoolAttempt: " + System.currentTimeMillis());
         requestCount++;
         ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_STARTSINGLE);
         if (extensions != null) {
-            extensions.onPoolConnection();
+            extensions.onConnectionPoolAttempt();
         }
     }
 
-    /**
-     * onRetry.
-     */
+    @Override
+    public void onConnectionPooled(Channel connection) {
+        LOGGER.debug("onConnectionPooled: " + System.currentTimeMillis());
+        if (extensions != null) {
+            extensions.onConnectionPooled(connection);
+        }
+    }
+
+    @Override
+    public void onConnectionOffer(Channel connection) {
+        LOGGER.debug("onConnectionOffer: " + System.currentTimeMillis());
+        if (extensions != null) {
+            extensions.onConnectionOffer(connection);
+        }
+    }
+
+    @Override
+    public void onRequestSend(NettyRequest request) {
+        LOGGER.debug("onRequestSend: " + System.currentTimeMillis());
+        if (extensions != null) {
+            extensions.onRequestSend(request);
+        }
+    }
+
     public void onRetry() {
+        LOGGER.debug("onRetry: " + System.currentTimeMillis());
         if (extensions != null) {
             extensions.onRetry();
         }
     }
 
-    /**
-     * onSendRequest.
-     * @param request request
-     */
-    public void onSendRequest(final Object request) {
-        LOGGER.debug("onSendRequest: " + System.currentTimeMillis());
-        if (extensions != null) {
-            extensions.onSendRequest(request);
-        }
+    @Override
+    public State onBodyPartReceived(final HttpResponseBodyPart bodyPart) throws Exception {
+        LOGGER.debug("onBodyPartReceived: " + System.currentTimeMillis());
+        builder.accumulate(bodyPart);
+        return asyncHandler.onBodyPartReceived(bodyPart);
     }
 
-    /**
-     * onStatusReceived.
-     *
-     * @param responseStatus response status
-     * @return STATE
-     * @throws Exception exception
-     */
-    public STATE onStatusReceived(final HttpResponseStatus responseStatus) throws Exception {
+    @Override
+    public State onHeadersReceived(final HttpResponseHeaders headers) throws Exception {
+        LOGGER.debug("onHeadersReceived: " + System.currentTimeMillis());
+        builder.accumulate(headers);
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_STARTTRANSFER);
+        return asyncHandler.onHeadersReceived(headers);
+    }
+
+    @Override
+    public State onStatusReceived(final HttpResponseStatus responseStatus) throws Exception {
+        LOGGER.debug("onStatusReceived: " + System.currentTimeMillis());
         builder.reset();
         builder.accumulate(responseStatus);
         return asyncHandler.onStatusReceived(responseStatus);
     }
 
-    /**
-     * onHeaderWriteCompleted.
-     * @return STATE
-     */
-    @Override
-    public STATE onHeaderWriteCompleted() {
-        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_PRETRANSFER);
-        if (progressAsyncHandler != null) {
-            return progressAsyncHandler.onHeaderWriteCompleted();
-        }
-        return null;
-    }
-
-    /**
-     * onContentWriteCompleted.
-     * @return STATE
-     */
-    @Override
-    public STATE onContentWriteCompleted() {
-        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_PRETRANSFER);
-        if (progressAsyncHandler != null) {
-            return progressAsyncHandler.onContentWriteCompleted();
-        }
-        return null;
-    }
-
-    /**
-     * onContentWriteProgress.
-     * @param amount amount
-     * @param current current
-     * @param total total
-     * @return STATE
-     */
-    public STATE onContentWriteProgress(long amount, long current, long total) {
-        if (progressAsyncHandler != null) {
-            return progressAsyncHandler.onContentWriteProgress(amount, current, total);
-        }
-        return null;
-    }
-
-    /**
-     * onThrowable.
-     * @param t throwable
-     */
     @Override
     public void onThrowable(Throwable t) {
+        LOGGER.debug("onThrowable: " + System.currentTimeMillis());
         ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_TOTAL);
         writeProfilingLog(null);
         progress.reset();
@@ -250,6 +241,7 @@ class ParsecAsyncHandlerWrapper<T> implements AsyncHandler<T>, ProgressAsyncHand
 
     @Override
     public T onCompleted() throws Exception {
+        LOGGER.debug("onCompleted: " + System.currentTimeMillis());
         final Response ningResponse = builder.build();
 
         ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_TOTAL);
@@ -260,30 +252,38 @@ class ParsecAsyncHandlerWrapper<T> implements AsyncHandler<T>, ProgressAsyncHand
         return asyncHandler.onCompleted();
     }
 
-    /**
-     * onSslHandshakeCompleted.
-     */
     @Override
-    public void onSslHandshakeCompleted() {
-        if (extensions != null) {
-            extensions.onSslHandshakeCompleted();
+    public State onHeadersWritten() {
+        LOGGER.debug("onHeadersWritten: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_PRETRANSFER);
+        if (progressAsyncHandler != null) {
+            return progressAsyncHandler.onHeadersWritten();
         }
+        return null;
     }
 
-    /**
-     * the progress getter.
-     *
-     * @return progress
-     */
+    @Override
+    public State onContentWritten() {
+        LOGGER.debug("onContentWritten: " + System.currentTimeMillis());
+        ParsecAsyncProgressTimer.progressTime(progress, ParsecAsyncProgressTimer.TimerOpCode.TIMER_PRETRANSFER);
+        if (progressAsyncHandler != null) {
+            return progressAsyncHandler.onContentWritten();
+        }
+        return null;
+    }
+
+    public State onContentWriteProgress(long amount, long current, long total) {
+        LOGGER.debug("onContentWriteProgress: " + System.currentTimeMillis());
+        if (progressAsyncHandler != null) {
+            return progressAsyncHandler.onContentWriteProgress(amount, current, total);
+        }
+        return null;
+    }
+
     public ParsecAsyncProgress getProgress() {
         return this.progress;
     }
 
-    /**
-     * write log profiling.
-     *
-     * @param ningResponse ning response
-     */
     private void writeProfilingLog(
             final Response ningResponse) {
         String requestStatus = ParsecClientDefine.REQUEST_SINGLE;
